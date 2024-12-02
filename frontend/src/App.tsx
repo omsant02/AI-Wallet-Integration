@@ -6,7 +6,7 @@ function App() {
             <div className="max-w-4xl mx-auto">
                 <div className="flex items-center justify-between mb-12">
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                        StarknetStake Wallet
+                        StarkStake Wallet
                     </h1>
                     <div className="px-4 py-2 bg-gray-800 rounded-lg text-sm text-gray-400">
                         Sepolia Testnet
