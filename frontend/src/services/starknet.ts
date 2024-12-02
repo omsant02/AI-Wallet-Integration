@@ -1,4 +1,4 @@
-import { RpcProvider, Account, uint256, constants } from 'starknet';
+import { RpcProvider, uint256 } from 'starknet';
 
 // Your deployed wallet details
 export const WALLET_ADDRESS = "0x2ad7edadcf0bf9c8e78a70257de27e0ee45b5c911462fbb90f2f26fa07122b3";

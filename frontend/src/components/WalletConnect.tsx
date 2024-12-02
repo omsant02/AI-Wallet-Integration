@@ -1,14 +1,23 @@
 import { useState } from 'react';
 import { useWallet } from '../hooks/useWallet';
 import { SendETHModal } from './SendETHModal';
+import { shortenAddress, formatEth } from '../hooks/useWallet';
 
 export function WalletConnect() {
-    const { connect, disconnect, isConnected, account } = useWallet();
+    const { 
+        connect, 
+        disconnect, 
+        isConnected, 
+        account, 
+        balance, 
+        transactions 
+    } = useWallet();
     const [isSendModalOpen, setIsSendModalOpen] = useState(false);
 
     if (isConnected && account) {
         return (
             <div className="space-y-6">
+                {/* Wallet Details Card */}
                 <div className="p-6 bg-[#1a1b23] rounded-xl border border-gray-800">
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -21,13 +30,23 @@ export function WalletConnect() {
                             </div>
                         </div>
 
+                        {/* Wallet Address Section */}
                         <div className="space-y-2">
                             <label className="text-sm text-gray-400">Wallet Address</label>
-                            <div className="p-3 bg-[#2a2b33] rounded-lg font-mono text-sm break-all text-gray-300">
-                                {account.address}
+                            <div className="relative">
+                                <div className="p-3 bg-[#2a2b33] rounded-lg font-mono text-sm break-all text-gray-300">
+                                    {account.address}
+                                </div>
+                                <button 
+                                    onClick={() => navigator.clipboard.writeText(account.address)}
+                                    className="absolute right-2 top-2 text-gray-400 hover:text-gray-200 text-sm p-1"
+                                >
+                                    Copy
+                                </button>
                             </div>
                         </div>
 
+                        {/* Action Buttons */}
                         <div className="flex justify-between items-center pt-4">
                             <button 
                                 onClick={disconnect}
@@ -35,6 +54,7 @@ export function WalletConnect() {
                             >
                                 Disconnect
                             </button>
+                            
                             <button 
                                 onClick={() => setIsSendModalOpen(true)}
                                 className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200"
@@ -45,18 +65,60 @@ export function WalletConnect() {
                     </div>
                 </div>
 
+                {/* Balance and Network Info */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="p-6 bg-[#1a1b23] rounded-xl border border-gray-800">
                         <h3 className="text-sm text-gray-400 mb-2">ETH Balance</h3>
-                        <div className="text-2xl font-semibold text-gray-200">0.00 ETH</div>
+                        <div className="text-2xl font-semibold text-gray-200">
+                            {formatEth(balance)} ETH
+                        </div>
                     </div>
-
+                    
                     <div className="p-6 bg-[#1a1b23] rounded-xl border border-gray-800">
                         <h3 className="text-sm text-gray-400 mb-2">Network</h3>
-                        <div className="text-2xl font-semibold text-gray-200">Sepolia</div>
+                        <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                            <span className="text-2xl font-semibold text-gray-200">Sepolia</span>
+                        </div>
                     </div>
                 </div>
 
+                {/* Transaction History */}
+                {transactions.length > 0 && (
+                    <div className="p-6 bg-[#1a1b23] rounded-xl border border-gray-800">
+                        <h3 className="text-xl font-semibold text-gray-200 mb-4">
+                            Recent Transactions
+                        </h3>
+                        <div className="space-y-3">
+                            {transactions.map((tx) => (
+                                <div key={tx.hash} className="p-4 bg-[#2a2b33] rounded-lg">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <p className="text-gray-400 text-sm">To:</p>
+                                            <p className="text-gray-200 font-mono text-sm">
+                                                {shortenAddress(tx.to)}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-gray-400 text-sm">Amount:</p>
+                                            <p className="text-gray-200">{tx.amount} ETH</p>
+                                        </div>
+                                    </div>
+                                    <a 
+                                        href={`https://sepolia.starkscan.co/tx/${tx.hash}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-400 hover:text-blue-300 text-sm block mt-2"
+                                    >
+                                        View on Explorer ↗
+                                    </a>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Send ETH Modal */}
                 <SendETHModal 
                     isOpen={isSendModalOpen}
                     onClose={() => setIsSendModalOpen(false)}
@@ -65,6 +127,7 @@ export function WalletConnect() {
         );
     }
 
+    // Not Connected State
     return (
         <div className="flex flex-col items-center justify-center min-h-[400px] p-8 bg-[#1a1b23] rounded-xl border border-gray-800">
             <div className="text-center space-y-4 mb-8">
@@ -75,7 +138,7 @@ export function WalletConnect() {
                     Connect your wallet to get started
                 </p>
             </div>
-
+            
             <button 
                 onClick={connect}
                 className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 transform hover:scale-105"
