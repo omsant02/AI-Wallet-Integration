@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useWallet } from '../hooks/useWallet';
 import { SendETHModal } from './SendETHModal';
 import { shortenAddress, formatEth } from '../hooks/useWallet';
+import RegisterForm from "./RegisterForm";
+import LoginForm from "./LoginForm";
+import { runConversation } from "./aicomponent";
 
 export function WalletConnect() {
     const { 
@@ -13,7 +16,33 @@ export function WalletConnect() {
         transactions 
     } = useWallet();
     const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+    const [inputValue, setInputValue] = useState('')
+    const [result, setResult] = useState('')
 
+
+    const handleSubmitComponent = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
+        const processedResult = await processInputcomponent(inputValue)
+        setResult(processedResult)
+      }
+    
+      const HelloWorld = () => {
+        return <button>Hello, World!</button>
+      }
+      const processInputcomponent = async (input: string): Promise<string>  => {
+        let output = '';
+        console.log(input);
+        await runConversation(input).then((value: string) => {
+          output = value;
+        })
+        .catch((error: string) => {
+          console.error('Promise rejected with error: ' + error);
+        });
+        console.log(output)
+        return output;
+        //return <HelloWorld />
+      }
+    
     if (isConnected && account) {
         return (
             <div className="space-y-6">
@@ -52,7 +81,7 @@ export function WalletConnect() {
                                 onClick={disconnect}
                                 className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"
                             >
-                                Disconnect
+                                Log Out
                             </button>
                             
                             <button 
@@ -116,6 +145,7 @@ export function WalletConnect() {
                             ))}
                         </div>
                     </div>
+                    
                 )}
 
                 {/* Send ETH Modal */}
@@ -123,28 +153,64 @@ export function WalletConnect() {
                     isOpen={isSendModalOpen}
                     onClose={() => setIsSendModalOpen(false)}
                 />
+
+                <div>
+                <h1 className="text-4xl font-bold mb-8">AI Web3 Bot - Makes life easier 🛸</h1>
+        
+        <form onSubmit={handleSubmitComponent} className="w-full max-w-md space-y-4">
+          <input 
+            type="text" 
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Enter some text..."
+            className="w-full md:w-96 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          
+          <button 
+            type="submit"
+            disabled={!inputValue}
+            className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+          >
+            Submit
+          </button>
+          {/* <div>
+          {resultComponent && resultComponent}
+          </div> */}
+          
+          {result && (
+            <p className="mt-4 text-xl font-semibold">Result: {result}</p>
+          )}
+        </form>
+                </div>
             </div>
+            
         );
     }
 
     // Not Connected State
     return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] p-8 bg-[#1a1b23] rounded-xl border border-gray-800">
-            <div className="text-center space-y-4 mb-8">
-                <h2 className="text-2xl font-bold text-gray-200">
-                    Welcome to Starknet Wallet
-                </h2>
-                <p className="text-gray-400">
-                    Connect your wallet to get started
-                </p>
-            </div>
+        // <div className="flex flex-col items-center justify-center min-h-[400px] p-8 bg-[#1a1b23] rounded-xl border border-gray-800">
+        //     <div className="text-center space-y-4 mb-8">
+        //         <h2 className="text-2xl font-bold text-gray-200">
+        //             Welcome to Starknet Wallet
+        //         </h2>
+        //         <p className="text-gray-400">
+        //             Enter your wallet to get started
+        //         </p>
+        //     </div>
             
-            <button 
-                onClick={connect}
-                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 transform hover:scale-105"
-            >
-                Connect Wallet
-            </button>
+        //     <button 
+        //         onClick={connect}
+        //         className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg transition-all duration-200 transform hover:scale-105"
+        //     >
+        //         Enter Your Wallet
+        //     </button>
+        // </div>
+        <>
+        <div>
+            <LoginForm/>
+            <RegisterForm/>
         </div>
+      </>
     );
 }
