@@ -8,7 +8,7 @@ import { runConversation } from "./aicomponent";
 
 export function WalletConnect() {
     const { 
-        connect, 
+        //connect, 
         disconnect, 
         isConnected, 
         account, 
@@ -26,9 +26,9 @@ export function WalletConnect() {
         setResult(processedResult)
       }
     
-      const HelloWorld = () => {
-        return <button>Hello, World!</button>
-      }
+    //   const HelloWorld = () => {
+    //     return <button>Hello, World!</button>
+    //   }
       const processInputcomponent = async (input: string): Promise<string>  => {
         let output = '';
         console.log(input);

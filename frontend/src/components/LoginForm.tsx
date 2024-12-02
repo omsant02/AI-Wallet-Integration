@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AuthService } from '../lib/auth';
+//import { AuthService } from '../lib/auth';
 import { useWallet } from '../hooks/useWallet';
 //import { useRouter } from 'next/router';
 
@@ -17,7 +17,7 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const userData = await AuthService.login(username, password);
+      // -const userData = await AuthService.login(username, password);
       // Store session or redirect
       localStorage.setItem('isAuthenticated', 'true');
       //window.location.href = '/aiPage';

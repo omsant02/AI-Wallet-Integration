@@ -1,7 +1,8 @@
 import { Groq } from 'groq-sdk';
-import { useWallet } from '../hooks/useWallet';
 import { provider, WALLET_ADDRESS, WALLET_PRIVATE_KEY, ETH_CONTRACT } from '../services/starknet';
 import { Account, uint256 } from 'starknet';
+import { type ChatCompletionMessageParam, type ChatCompletionTool } from 'groq-sdk/resources/chat/completions';
+
 // require('dotenv').config();
 // import { Send } from './send';
 // import { getToken } from '../lib/starknet/voyager'
@@ -21,23 +22,24 @@ const apiKeyGroq = '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';
 const client = new Groq({ apiKey: apiKeyGroq, dangerouslyAllowBrowser: true });
 const MODEL = 'llama3-groq-70b-8192-tool-use-preview';
 
-
-function calculate(args: { expression: string }): any {
-    try {
-        const result = eval(args.expression);
-        return JSON.stringify({ result });
-    } catch {
-        return JSON.stringify({ error: "Invalid prompt" });
-    }
-}
+// function calculate(args: { expression: string }): any {
+//     try {
+//         const result = eval(args.expression);
+//         return JSON.stringify({ result });
+//     } catch {
+//         return JSON.stringify({ error: "Invalid prompt" });
+//     }
+// }
 
 async function transferToken(args: { tokenName: string, recipient: string, amount: string, transactionHash: string }): Promise<string> {
     try {
         console.log("called");
-
+        const amountInt = parseFloat(args.amount);
+        const amountBigint = BigInt(amountInt * 10 ** 18);
         // Prepare transaction
         const account = new Account(provider, WALLET_ADDRESS, WALLET_PRIVATE_KEY);
-        const amountUint256 = uint256.bnToUint256(args.amount);
+        const amountUint256 = uint256.bnToUint256(amountBigint);
+        console.log(amountUint256);
         const tx = await account.execute({
             contractAddress: ETH_CONTRACT,
             entrypoint: "transfer",
@@ -237,7 +239,7 @@ async function getTransactionReceipt(args: { tokenName: string, recipient: strin
 }
 
 export async function runConversation(prompt: string): Promise<string> {
-    const messages = [
+    const messages: ChatCompletionMessageParam[] = [
         {
             role: "system",
             content: "You are a DeFi bot on Starknet and you can help users with activities like transferring tokens to others, fetching the chainID of a token, fetching the block number of a token, fetching the details of a transaction, fetching the reciept of a transaction, checking their balance of a token, fetching both block hash and block number of a token, transferring tokens to others, swapping tokens on DEXes, and understanding past transactions by simulating them. If the user requests to send some token X to recipient Y for amount Z, call transferToken function to transfer token to another address. If the user requests to fetch/get the block number of a token X, call getBlockNumber function. If the user requests to fetch/get the details of a transaction with its hash X, call getTransactionByHash function. If the user requests to fetch/get the reciept of a transaction with its hash X, call getTransactionReceipt function. If the user requests to fetch/get both block number and block hash of a token X, call getblockHashAndNumber function. If the user requests to fetch/get the chainID of a token X, call getChainID function. If the user requests to swap some token X for token Y and the amount of X to swap, call swapTokens function to swap token to another token.If the user requests to check the balance of a token in a wallet, call balanceOf function to check the balance of a token in a wallet.Besides that, you can also chat with users and do some calculations if needed."
@@ -248,7 +250,7 @@ export async function runConversation(prompt: string): Promise<string> {
         }
     ];
 
-    const tools = [
+    const tools: ChatCompletionTool[] = [
         {
             type: "function",
             function: {
@@ -473,12 +475,12 @@ export async function runConversation(prompt: string): Promise<string> {
             [key: string]: (args: { tokenName: string, recipient: string, amount: string, transactionHash: string}) => any;
         }
 
-        interface Message {
-            tool_call_id?: string;
-            role: string;
-            name: string;
-            content: string;
-        }
+        // interface Message {
+        //     tool_call_id?: string;
+        //     role: string;
+        //     name: string;
+        //     content: string;
+        // }
 
         const availableFunctions: AvailableFunction = {
             transferToken: transferToken,
@@ -502,12 +504,19 @@ export async function runConversation(prompt: string): Promise<string> {
 
             // Ensure the content is always a string
             const contentString = typeof functionResponse === 'string' ? functionResponse : JSON.stringify(functionResponse);
+            // messages.push({
+            //     tool_call_id: toolCall.id,
+            //     role: "tool",
+            //     name: functionName,
+            //     content: contentString,
+            // }as Message);
+
             messages.push({
                 tool_call_id: toolCall.id,
-                role: "tool",
+                role: "function",
                 name: functionName,
                 content: contentString,
-            }as Message);
+            } as ChatCompletionMessageParam);
         }
 
         const secondResponse = await client.chat.completions.create({
