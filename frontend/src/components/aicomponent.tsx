@@ -17,10 +17,10 @@ interface ChainIdResponse {
 }
 
 //const apiKeyGroq = process.env.GROQ_API_KEY;
-const apiKeyGroq = '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';
+const apiKeyGroq = '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';
 
 const client = new Groq({ apiKey: apiKeyGroq, dangerouslyAllowBrowser: true });
-const MODEL = 'llama3-groq-70b-8192-tool-use-preview';
+const MODEL = 'llama-3.3-70b-versatile';
 
 // function calculate(args: { expression: string }): any {
 //     try {
