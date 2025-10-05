@@ -1,5 +1,5 @@
 # Project Overview
-StarkStake Wallet is an AI-powered smart contract wallet that enables users to interact with the Starknet blockchain through simple conversational commands, providing features like natural language transaction signing, balance management, and seamless RPC interactions - all designed to make Web3 more approachable for mainstream users.
+StarkPAI Wallet is an AI-powered smart contract wallet that enables users to interact with the Starknet blockchain through simple conversational commands, providing features like natural language transaction signing, balance management, and seamless RPC interactions - all designed to make Web3 more approachable for mainstream users.
 # Problem Statement
 Current Web3 wallets remain a barrier to mainstream adoption:
 Complex technical requirements (addresses, gas, signing)
